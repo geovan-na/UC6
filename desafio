@@ -1,0 +1,135 @@
+create database Biblioteca;
+--
+-- 1. Criação das Tabelas
+--
+
+-- Tabela principal para Generalização/Especialização de Usuários
+CREATE TABLE USUARIO (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    nome_usuario VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    tipo_usuario CHAR(1) NOT NULL, -- 'A', 'P', 'B', 'V' (Aluno, Professor, Bibliotecário, Visitante)
+    data_cadastro DATE NOT NULL,
+    CONSTRAINT chk_tipo_usuario CHECK (tipo_usuario IN ('A', 'P', 'B', 'V'))
+);
+
+-- Tabela de Especialização: ALUNO
+CREATE TABLE ALUNO (
+    id_usuario INT PRIMARY KEY,
+    ra_aluno VARCHAR(15) UNIQUE NOT NULL,
+    curso VARCHAR(50),
+    FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+-- Tabela de Especialização: PROFESSOR
+CREATE TABLE PROFESSOR (
+    id_usuario INT PRIMARY KEY,
+    matricula_prof VARCHAR(15) UNIQUE NOT NULL,
+    departamento VARCHAR(50),
+    FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+-- Tabela de Especialização: BIBLIOTECARIO
+CREATE TABLE BIBLIOTECARIO (
+    id_usuario INT PRIMARY KEY,
+    registro_bibliotecario VARCHAR(15) UNIQUE NOT NULL,
+    turno VARCHAR(20),
+    FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+-- Tabela de LIVRO (metadados da obra)
+CREATE TABLE LIVRO (
+    isbn VARCHAR(20) PRIMARY KEY, -- Chave Primária (PK) conforme requisito
+    titulo VARCHAR(255) NOT NULL,
+    autor VARCHAR(100) NOT NULL,
+    editora VARCHAR(100),
+    ano_publicacao INT
+);
+
+-- Tabela de EXEMPLAR (cópia física do livro)
+CREATE TABLE EXEMPLAR (
+    id_exemplar INT AUTO_INCREMENT PRIMARY KEY,
+    isbn VARCHAR(20) NOT NULL,
+    num_registro VARCHAR(50) UNIQUE NOT NULL,
+    status_exemplar VARCHAR(20) NOT NULL, -- 'Disponível', 'Emprestado', 'Perdido', 'Em Reparo'
+    FOREIGN KEY (isbn) REFERENCES LIVRO(isbn)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT -- Não permite deletar o livro se houver exemplares.
+);
+
+-- Tabela de EMPRESTIMO
+CREATE TABLE EMPRESTIMO (
+    id_emprestimo INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_exemplar INT NOT NULL,
+    data_emprestimo DATETIME NOT NULL,
+    data_devolucao_prevista DATE NOT NULL,
+    data_devolucao_real DATETIME, -- Nullable: preenchido na devolução
+    
+    -- Restrição para garantir que um exemplar não esteja em dois empréstimos ativos
+    UNIQUE (id_exemplar, data_devolucao_real), 
+    
+    FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT, -- Mantém o registro do empréstimo
+    FOREIGN KEY (id_exemplar) REFERENCES EXEMPLAR(id_exemplar)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT -- Não apagar exemplar com empréstimo registrado
+);
+
+-- Tabela de RESERVA
+CREATE TABLE RESERVA (
+    id_reserva INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    isbn VARCHAR(20) NOT NULL, -- Reserva é sobre o LIVRO, não o EXEMPLAR
+    data_reserva DATETIME NOT NULL,
+    status_reserva VARCHAR(50) NOT NULL, -- 'Ativa', 'Concluída', 'Cancelada'
+    
+    FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    FOREIGN KEY (isbn) REFERENCES LIVRO(isbn)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+);
+
+-- Tabela de PENALIDADE
+CREATE TABLE PENALIDADE (
+    id_penalidade INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_emprestimo INT, -- Pode ser NULL, se a penalidade não vier de um empréstimo (ex: dano no local)
+    tipo_penalidade VARCHAR(50) NOT NULL, -- 'Multa', 'Suspensão'
+    valor_multa DECIMAL(10, 2) DEFAULT 0.00,
+    data_inicio DATE NOT NULL,
+    data_fim DATE, -- Nullable para penalidades abertas ou multas
+    pago BOOLEAN DEFAULT FALSE,
+    
+    FOREIGN KEY (id_usuario) REFERENCES USUARIO(id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    FOREIGN KEY (id_emprestimo) REFERENCES EMPRESTIMO(id_emprestimo)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL -- Se o empréstimo for apagado, a penalidade ainda pode existir
+);
+
+--
+-- 2. Criação dos Índices Estratégicos (Performance)
+--
+
+-- Índice em ISBN: Fundamental para buscas rápidas por metadados de Livros e para a FK em EXEMPLAR
+CREATE INDEX idx_livro_isbn ON LIVRO(isbn);
+
+-- Índice em título de livro: Essencial para a funcionalidade de busca da biblioteca
+CREATE INDEX idx_livro_titulo ON LIVRO(titulo);
+
+-- Índice em nome_usuario: Essencial para buscar usuários rapidamente (ex: no balcão de atendimento)
+CREATE INDEX idx_usuario_nome ON USUARIO(nome_usuario);
+
+-- Índice para a busca rápida de exemplares por status
+CREATE INDEX idx_exemplar_status ON EXEMPLAR(status_exemplar);
