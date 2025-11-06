@@ -1,0 +1,68 @@
+use ecommerce;
+-- TABELA USUARIOS
+ALTER TABLE usuarios
+    -- O CPF é único e usado para busca. Adicionamos um índice UNIQUE.
+    ADD UNIQUE INDEX idx_cpf (cpf),
+    -- O nome é usado para buscas comuns e ordenação.
+    ADD INDEX idx_nome (nome); -- foi
+
+-- TABELA ENDERECOS
+-- A coluna cliente_id será uma FK, mas também adicionamos um índice nela para otimizar JOINs.
+ALTER TABLE enderecos
+    ADD INDEX idx_fk_endereco_usuario (cliente_id); -- foi
+        SHOW INDEX FROM enderecos;
+
+
+-- TABELA CATEGORIAS
+-- O nome da categoria deve ser único para evitar duplicidade.
+ALTER TABLE categorias
+    ADD UNIQUE INDEX idx_nome_categoria (nome);-- já foi
+
+-- TABELA PRODUTOS
+-- A coluna categoria_id será uma FK, mas também adicionamos um índice nela para otimizar JOINs.
+ALTER TABLE produtos
+    ADD INDEX idx_fk_produto_categoria (categoria_id);
+            SHOW INDEX FROM produtos;
+
+
+-- TABELA PEDIDOS
+-- A coluna cliente_id será uma FK, mas também adicionamos um índice nela para otimizar JOINs.
+ALTER TABLE pedidos
+    ADD INDEX idx_fk_pedido_usuario (cliente_id); -- foi
+        SHOW INDEX FROM pedidos;
+
+-- TABELA ITENS_PEDIDO
+-- Índices para as duas FKs para otimizar os JOINs
+ALTER TABLE itens_pedido
+    ADD INDEX idx_fk_item_pedido (pedido_id),
+    ADD INDEX idx_fk_item_produto (produto_id);
+        SHOW INDEX FROM itens_pedido;
+
+-- TABELA ENDERECOS -> USUARIOS (Um usuário tem N endereços)
+ALTER TABLE enderecos
+    ADD CONSTRAINT fk_endereco_usuario
+    FOREIGN KEY (cliente_id) REFERENCES usuarios(id);
+        SHOW INDEX FROM enderecos;
+
+-- TABELA PRODUTOS -> CATEGORIAS (Uma categoria tem N produtos)
+ALTER TABLE produtos
+    ADD CONSTRAINT fk_produto_categoria
+    FOREIGN KEY (categoria_id) REFERENCES categorias(id);
+
+-- TABELA PEDIDOS -> USUARIOS (Um usuário tem N pedidos)
+ALTER TABLE pedidos
+    ADD CONSTRAINT fk_pedido_usuario
+    FOREIGN KEY (cliente_id) REFERENCES usuarios(id);
+
+-- TABELA ITENS_PEDIDO -> PEDIDOS
+-- Cada item do pedido se refere a um pedido existente.
+ALTER TABLE itens_pedido
+    ADD CONSTRAINT fk_item_pedido
+    FOREIGN KEY (pedido_id) REFERENCES pedidos(id);
+
+-- TABELA ITENS_PEDIDO -> PRODUTOS
+-- Cada item do pedido se refere a um produto existente.
+ALTER TABLE itens_pedido
+    ADD CONSTRAINT fk_item_produto
+    FOREIGN KEY (produto_id) REFERENCES produtos(id);
+    SHOW INDEX FROM categorias;
