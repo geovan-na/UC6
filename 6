@@ -1,0 +1,174 @@
+use ecommerce; 
+GRANT SELECT ON ecommerce.produtos TO 'estoquista'@'%';
+GRANT UPDATE (estoque) ON ecommerce.produtos TO 'estoquista'@'%';
+
+-- ##################################################################
+-- # SCRIPT DE GERENCIAMENTO DE PRIVILÉGIOS (GRANTS) PARA E-COMMERCE #
+-- ##################################################################
+
+-- O comando FLUSH é usado no final para garantir que o MySQL recarregue
+-- a tabela de privilégios e as permissões entrem em vigor imediatamente.
+
+-- =================================================================
+-- 1. CRIAÇÃO DE USUÁRIOS (PRÉ-REQUISITO)
+-- =================================================================
+
+-- DBA Master (Acesso total local)
+CREATE USER 'dba_master'@'localhost' IDENTIFIED BY 'senha_dba_forte';
+-- Estoquista (Acesso de qualquer host)
+CREATE USER 'estoquista'@'%' IDENTIFIED BY 'senha_estoque';
+-- Logística (Acesso de qualquer host)
+CREATE USER 'logistica'@'%' IDENTIFIED BY 'senha_log';
+-- Marketing (Acesso de qualquer host)
+CREATE USER 'marketing'@'%' IDENTIFIED BY 'senha_mkt';
+-- Atendimento/SAC (Acesso de qualquer host)
+CREATE USER 'atendimento'@'%' IDENTIFIED BY 'senha_sac';
+
+
+-- =================================================================
+-- 2. PRIVILÉGIOS GLOBAIS (NÍVEL *.*)
+-- =================================================================
+
+-- DBA Master: Permissão total no servidor, incluindo a criação de outros usuários.
+GRANT ALL PRIVILEGES ON *.* TO 'dba_master'@'localhost' WITH GRANT OPTION;
+-- Comentário: Uso restrito à máquina local.
+
+-- =================================================================
+-- 3. PRIVILÉGIOS DE OBJETO/COLUNA (NÍVEL MAIS RESTRITO)
+-- =================================================================
+
+-- -----------------------------------------------------------------
+-- PERFIL: ESTOQUISTA
+-- Apenas para gerenciar estoque. Não pode alterar preços ou deletar.
+-- -----------------------------------------------------------------
+-- Leitura completa de Produtos (para verificar dados)
+-- Permissão de escrita (UPDATE) APENAS na coluna 'estoque'.
+
+
+
+-- -----------------------------------------------------------------
+-- PERFIL: LOGÍSTICA
+-- Apenas para rastreio e envio de pedidos.
+-- -----------------------------------------------------------------
+-- Leitura completa da tabela Pedido.
+GRANT SELECT ON ecommerce.pedidos TO 'logistica'@'%';
+-- Permissão de escrita (UPDATE) APENAS nas colunas de rastreamento.
+ALTER TABLE ecommerce.pedidos ADD COLUMN data_envio DATE NULL;
+GRANT UPDATE (status, data_envio) ON ecommerce.pedidos TO 'logistica'@'%';
+
+ 
+-- -----------------------------------------------------------------
+-- PERFIL: MARKETING
+-- Apenas para extrair e-mails para campanhas. Seguranca de PII.
+-- -----------------------------------------------------------------
+-- Permissão de LEITURA (SELECT) APENAS na coluna 'email' da tabela Cliente.
+GRANT SELECT (email) ON ecommerce.usuario TO 'marketing'@'%';
+
+
+-- -----------------------------------------------------------------
+-- PERFIL: ATENDIMENTO (SAC)
+-- Usuário puramente consultivo. Não deve alterar, inserir ou deletar.
+-- -----------------------------------------------------------------
+-- Leitura nas tabelas de Cliente, Pedido e Itens do Pedido.
+GRANT SELECT ON ecommerce.usuarios TO 'atendimento'@'%';
+GRANT SELECT ON ecommerce.pedidos TO 'atendimento'@'%';
+GRANT SELECT ON ecommerce.itens_pedido TO 'atendimento'@'%';
+
+
+-- =================================================================
+-- 4. FINALIZAÇÃO
+-- =================================================================
+
+-- Comando obrigatório para que as novas permissões sejam lidas e aplicadas imediatamente.
+FLUSH PRIVILEGES;
+
+
+-- ##################################################################
+
+-- 3. PRIVILÉGIOS DE OBJETO/COLUNA (NÍVEL MAIS RESTRITO)
+-----------------------------------------------------------------
+
+-- PERFIL: ESTOQUISTA
+-- Apenas para gerenciar estoque. Não pode alterar preços ou deletar.
+GRANT SELECT ON ecommerce.produtos TO 'estoquista'@'%';
+GRANT UPDATE (estoque) ON ecommerce.produtos TO 'estoquista'@'%';
+
+-- -----------------------------------------------------------------
+-- PERFIL: LOGÍSTICA
+-- Apenas para rastreio e envio de pedidos.
+-- Assumimos que a coluna 'data_envio' foi adicionada.
+GRANT SELECT ON ecommerce.pedidos TO 'logistica'@'%';
+GRANT UPDATE (status, data_envio) ON ecommerce.pedidos TO 'logistica'@'%';
+
+-- -----------------------------------------------------------------
+-- PERFIL: MARKETING
+-- Apenas para extrair e-mails para campanhas. Segurança de PII.
+GRANT SELECT (email) ON ecommerce.usuarios TO 'marketing'@'%';
+
+-- -----------------------------------------------------------------
+-- PERFIL: ATENDIMENTO (SAC)
+-- Apenas para consultas gerais de pedidos, clientes e itens.
+GRANT SELECT ON ecommerce.usuarios TO 'atendimento'@'%';
+GRANT SELECT ON ecommerce.pedidos TO 'atendimento'@'%';
+GRANT SELECT ON ecommerce.itens_pedido TO 'atendimento'@'%';
+-- Obs: A tabela 'Itens_do_Pedido' foi corrigida para 'itens_pedido'.
+
+-- ##################################################################
+-- # SCRIPT DE REVOGAÇÃO DE PRIVILÉGIOS (REVOKE) PARA E-COMMERCE
+-- ##################################################################
+
+-- =================================================================
+-- 1. REVOGAÇÃO DE PRIVILÉGIOS (NÍVEL DE OBJETO/COLUNA)
+-- =================================================================
+
+-- -----------------------------------------------------------------
+-- PERFIL: ESTOQUISTA (Reverte as permissões de estoque e leitura)
+-- -----------------------------------------------------------------
+REVOKE UPDATE (estoque) ON ecommerce.produtos FROM 'estoquista'@'%';
+REVOKE SELECT ON ecommerce.produtos FROM 'estoquista'@'%';
+
+
+-- -----------------------------------------------------------------
+-- PERFIL: LOGÍSTICA (Reverte as permissões de rastreio)
+-- -----------------------------------------------------------------
+REVOKE UPDATE (status, data_envio) ON ecommerce.pedidos FROM 'logistica'@'%';
+REVOKE SELECT ON ecommerce.pedidos FROM 'logistica'@'%';
+
+
+-- -----------------------------------------------------------------
+-- PERFIL: MARKETING (Reverte o acesso a PII)
+-- -----------------------------------------------------------------
+REVOKE SELECT (email) ON ecommerce.usuarios FROM 'marketing'@'%';
+
+
+-- -----------------------------------------------------------------
+-- PERFIL: ATENDIMENTO (SAC) (Reverte o acesso consultivo)
+-- -----------------------------------------------------------------
+REVOKE SELECT ON ecommerce.usuarios FROM 'atendimento'@'%';
+REVOKE SELECT ON ecommerce.pedidos FROM 'atendimento'@'%';
+REVOKE SELECT ON ecommerce.itens_pedido FROM 'atendimento'@'%';
+
+
+-- =================================================================
+-- 2. REVOGAÇÃO GERAL E EXCLUSÃO DE USUÁRIOS
+-- =================================================================
+
+-- DBA MASTER: Revoga todos os privilégios globais e a opção de conceder (GRANT OPTION).
+REVOKE ALL PRIVILEGES ON  FROM 'dba_master'@'localhost';
+REVOKE GRANT OPTION ON *.* FROM 'dba_master'@'localhost';
+
+-- EXCLUSÃO COMPLETA:
+-- DROP USER 'estoquista'@'%';
+-- DROP USER 'logistica'@'%';
+-- DROP USER 'marketing'@'%';
+-- DROP USER 'atendimento'@'%';
+-- DROP USER 'dba_master'@'localhost';
+
+
+-- =================================================================
+-- 3. FINALIZAÇÃO
+-- =================================================================
+
+FLUSH PRIVILEGES;
+
+-- ##################################################################
