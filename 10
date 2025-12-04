@@ -1,0 +1,71 @@
+create table tbcostumer(
+	Code int identity (1,1),
+	Nome varchar (100)null,
+	Address varchar (250)null,
+	Phone varchar (25)null,
+	Email varchar (100)null,
+	primary key (Code)	
+);
+SP_help'tbcostumer'
+-- Alterando tabelas
+ALTER TABLE tbcostumer
+ADD Birthdate datetime null
+
+SP_help'tbcostumer'
+
+INSERT INTO tbcostumer(
+	Nome,
+	Address,
+	Phone,
+	Email,
+	Birthdate
+	)
+VALUES
+('Paulo Roberto', 'Ruas das Pedras, 132, Santa Rosa, SC', '48-32334567', 'joao@hotmail.com', '19871218'),
+('Maria Paula', 'Ruas das Tainhas,54, Santa Rosa, SC', '48-323342643', 'mario@hotmail.com', '19811113'),
+('Rodrigo Ruas', 'Ruas das Esmeraldas, 165, Santa Rosa, SC', '48-998988776', 'paulo@hotmail.com', '19800101'),
+('Maria das Dores', 'Rua dos Badejos, 9898, Santa Rosa, SC', '65861413', 'maria@hotmail.com', '19770102'),
+('Paulo Dutra', 'Rua das Bromelias, 11, Santa Rosa, SC', '48-91918282', 'paula@hotmail.com', '19860101'),
+('Guilherme da Silva', 'Rua das Pedras, 132Santa Rosa, SC', '48-32334567', 'joao@hotmail.com', '19871218'),
+('Isabela Santos', 'Rua Sete de Setembro, 505, Militar, SC', '48-992345678', 'isabela.s@hotmail.com', '19900214'),
+('Ricardo Rocha', 'Avenida Brasil, 606, Leste, SC', '48-32543210', 'ricardo.rocha@hotmail.com', '19830801'),
+('Juliana Melo', 'Rua Cândido Portinari, 707, Oeste, SC', '48-987651234', 'julianam@hotmail.com', '19960417'),
+('Pedro Henrique', 'Travessa da Saudade, 808, Sul, SC', '48-33112233', 'pedroh@hotmail.com', '19701022'),
+('Vanessa Borges', 'Rua da Harmonia, 909, Norte, SC', '48-993456789', 'vanessa.b@hotmail.com', '19880608'),
+('Márcio Oliveira', 'Alameda das Rosas, 1010, Central, SC', '48-32654321', 'marcio.o@hotmail.com', '19820128'),
+('Fernanda Silva', 'Rua dos Girassóis, 1111, Jardins, SC', '48-981234560', 'fernandas@hotmail.com', '19910303'),
+('Gustavo Pereira', 'Avenida das Palmeiras, 1212, Alto, SC', '48-33778899', 'gustavop@hotmail.com', '19790919'),
+('Lívia Martins', 'Rua do Comércio, 1313, Centro, SC', '48-994567890', 'livia.m@hotmail.com', '19941127'),
+('Roberto Neves', 'Travessa da Lua, 1414, Céu Azul, SC', '48-32890123', 'roberton@hotmail.com', '19650409'),
+('Carla Ribeiro', 'Rua da Esperança, 1515, Esperança, SC', '48-985678901', 'carlar@hotmail.com', '19870612'),
+('Thiago Gomes', 'Avenida Principal, 1616, Principal, SC', '48-33901234', 'thiagog@hotmail.com', '19801007'),
+('Patrícia Lima', 'Rua Nova, 1717, Vila Nova, SC', '48-996789012', 'patricial@hotmail.com', '19930129'),
+('Eduardo Castro', 'Alameda da Paz, 1818, Paz, SC', '48-32012345', 'eduardo.c@hotmail.com', '19720316'),
+('Mariana Rocha', 'Rua do Sol, 1919, Sol Nascente, SC', '48-989012345', 'mariana.r@hotmail.com', '19990704'),
+('Vinícius Souza', 'Travessa da Estrela, 2020, Estrela, SC', '48-33345678', 'vinicius.s@hotmail.com', '19840502'),
+('Aline Costa', 'Rua da Alegria, 2121, Alegria, SC', '48-997890123', 'aline.c@hotmail.com', '19781111'),
+('Sérgio Melo', 'Avenida do Oceano, 2222, Mar, SC', '48-32456789', 'sergio.m@hotmail.com', '19690823'),
+('Elisa Pires', 'Rua das Montanhas, 2323, Serra, SC', '48-980123456', 'elisa.p@hotmail.com', '19970228'),
+('Murilo Nunes', 'Travessa do Rio, 2424, Rio, SC', '48-33567890', 'murilo.n@hotmail.com', '19811206'),
+('Renata Lopes', 'Rua da Lua, 2525, Lua, SC', '48-998901234', 'renata.l@hotmail.com', '19900909'),
+('Júlio Dantas', 'Alameda do Parque, 2626, Parque, SC', '48-32789012', 'julio.d@hotmail.com', '19760731'),
+('Giovanna Reis', 'Rua do Bosque, 2727, Bosque, SC', '48-986789012', 'giovanna.r@hotmail.com', '19890314'),
+('André Santos', 'Avenida do Lago, 2828, Lago, SC', '48-33012345', 'andre.s@hotmail.com', '19670519'),
+('Larissa Mendes', 'Rua da Ponte, 2929, Ponte, SC', '48-995678901', 'larissa.m@hotmail.com', '19941001'),
+('Márcio Pinto', 'Travessa da Mata, 3030, Mata, SC', '48-32234567', 'marcio.p@hotmail.com', '19850424'),
+('Viviane Lima', 'Rua do Cinema, 3131, Cinema, SC', '48-984567890', 'viviane.l@hotmail.com', '19730626'),
+('Diego Costa', 'Alameda do Porto, 3232, Porto, SC', '48-33678901', 'diego.c@hotmail.com', '19960818'),
+('Natália Cruz', 'Rua do Viaduto, 3333, Viaduto, SC', '48-999012345', 'natalia.c@hotmail.com', '19821107'),
+('Samuel Ferreira', 'Avenida da Cidade, 3434, Cidade, SC', '48-32901234', 'samuel.f@hotmail.com', '19770115'),
+('Cristina Barbosa', 'Rua do Pássaro, 3535, Pássaro, SC', '48-982345678', 'cristina.b@hotmail.com', '19910921'),
+('Alexandre Moura', 'Travessa do Morro, 3636, Morro, SC', '48-33890123', 'alexandre.m@email.com', '19861210'),
+('Helenice Vieira', 'Rua das Cachoeiras, 3737, Cachoeira, SC', '48-991012345', 'helenice.v@hotmail.com', '19750205'),
+('Ivanildo Júnior', 'Alameda do Mirante, 3838, Mirante, SC', '48-32123456', 'ivanildo.j@hotmail.com', '19930430');
+
+SELECT * FROM tbcostumer
+SELECT
+	CODE
+	, NOME
+	,GETDATE() AS [Data Atual]
+	,GETDATE() + 5 AS [Data Atual + Cinco Dias]
+from tbcostumer 
